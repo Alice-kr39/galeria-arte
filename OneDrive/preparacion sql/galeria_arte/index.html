@@ -1,0 +1,1376 @@
+<!DOCTYPE html>
+<!--
+  ============================================================
+  GALERÍA DE ARTE - BASE DEL PROYECTO
+  ============================================================
+  
+  ESTRUCTURA DE ARCHIVOS DE TU PROYECTO:
+  
+  galeria-arte/
+  │
+  ├── index.html          ← Este archivo. El esqueleto de la página
+  ├── css/
+  │   └── estilos.css     ← (próximo paso) Toda la apariencia visual
+  ├── js/
+  │   └── galeria.js      ← (próximo paso) La lógica del lightbox y filtros
+  └── imagenes/
+      ├── oleo/           ← Carpeta para tus óleos
+      ├── acrilico/       ← Carpeta para acrílicos
+      ├── grafito/        ← etc...
+      └── mixto/
+  
+  ¿QUÉ ES HTML?
+  HTML = HyperText Markup Language
+  Es el ESQUELETO de toda página web. Define QUÉ hay en la página.
+  CSS define CÓMO se ve. JS define QUÉ HACE.
+-->
+
+<html lang="es">
+
+<head>
+  <!--
+    HEAD = La cabeza del documento.
+    El usuario NO ve esto directamente, pero es muy importante.
+    Aquí van configuraciones, títulos, fuentes y estilos.
+  -->
+
+  <!-- Le dice al navegador que use caracteres en español (tildes, ñ, etc.) -->
+  <meta charset="UTF-8">
+
+  <!-- Hace que la página se vea bien en celulares (responsive) -->
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <!-- El título que aparece en la pestaña del navegador -->
+  <title>Galería de Arte</title>
+
+  <!-- 
+    FUENTES DE GOOGLE FONTS
+    Importamos dos fuentes elegantes para la galería:
+    - Cormorant Garamond: para títulos, se ve muy artística
+    - Raleway: para textos normales, limpia y moderna
+    Las fuentes se cargan desde internet, por eso necesitas conexión
+  -->
+
+  <!--
+    ESTILOS CSS
+    El atributo "rel" le dice que es una hoja de estilos.
+    El atributo "href" es la ruta al archivo.
+    Por ahora ponemos los estilos DENTRO del HTML (etiqueta <style>)
+    Más adelante los separamos en css/estilos.css
+  -->
+  <style>
+    /* 
+      ============================================================
+      CSS = CASCADING STYLE SHEETS
+      Todo lo que está entre /* */
+    son comentarios en CSS. El formato es siempre: selector {
+      propiedad: valor;
+    }
+
+    ============================================================*/
+
+    /* 
+      :root = El elemento raíz de toda la página (el <html>)
+      Aquí definimos VARIABLES CSS — como variables en Python o Java.
+      Las variables en CSS empiezan con --
+      Ventaja: si quieres cambiar el color principal, solo lo cambias aquí
+      y se actualiza en TODO el sitio automáticamente.
+    */
+    :root {
+      --color-fondo: #0a0a0a;
+      /* Negro casi puro para el fondo */
+      --color-superficie: #141414;
+      /* Negro un poco más claro para tarjetas */
+      --color-borde: #2a2a2a;
+      /* Gris oscuro para bordes sutiles */
+      --color-texto: #e8e0d5;
+      /* Blanco cálido para el texto */
+      --color-texto-suave: #8a8279;
+      /* Gris cálido para textos secundarios */
+      --color-acento: #1A6B8A;
+      /* Dorado suave — el color especial */
+      --fuente-titulo: 'Cormorant Garamond', serif;
+      --fuente-cuerpo: 'Raleway', sans-serif;
+      --transicion: 0.4s ease;
+      /* Velocidad de las animaciones */
+    }
+
+    /* 
+      * = Selecciona TODOS los elementos
+      box-sizing: border-box → hace que padding y border 
+      no agreguen tamaño extra (evita bugs de layout)
+      margin/padding: 0 → elimina espacios por defecto del navegador
+    */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    /* El cuerpo principal de la página */
+    body {
+      background-color: #0a0a0a;
+      /* Usamos la variable que definimos */
+      color: #e8e0d5;
+      font-family: var(--fuente-cuerpo);
+      font-weight: 300;
+      line-height: 1.6;
+      /* Espaciado entre líneas de texto */
+      min-height: 100vh;
+      /* vh = viewport height. 100vh = toda la pantalla */
+    }
+
+    /* ============================================================
+       HEADER — La barra superior con el nombre y navegación
+       ============================================================ */
+    header {
+      position: fixed;
+      /* fixed = se queda fijo aunque hagas scroll */
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 100;
+      /* z-index = qué tan "arriba" está (como capas) */
+      padding: 1.5rem 4rem;
+      display: flex;
+      /* flex = sistema de layout moderno */
+      justify-content: space-between;
+      /* Distribuye elementos: izquierda y derecha */
+      align-items: center;
+      border-bottom: 1px solid var(--color-borde);
+      background: rgba(10, 10, 10, 0.95);
+      /* rgba = color + opacidad */
+      backdrop-filter: blur(10px);
+      /* Efecto de vidrio esmerilado */
+    }
+
+    /* El nombre del artista en el header */
+    .logo {
+      font-family: var(--fuente-titulo);
+      font-size: 1.4rem;
+      font-weight: 400;
+      letter-spacing: 0.15em;
+      /* Espacio entre letras */
+      color: var(--color-texto);
+      text-decoration: none;
+      /* Quita el subrayado de los links */
+    }
+
+    /* El span dentro del logo para colorear parte del nombre */
+    .logo span {
+      color: #1A6B8A;
+    }
+
+    /* Navegación */
+    nav {
+      display: flex;
+      gap: 2.5rem;
+      /* gap = espacio entre elementos flex */
+    }
+
+    /* Los links de la navegación */
+    nav a {
+      color: var(--color-texto-suave);
+      text-decoration: none;
+      font-size: 0.75rem;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      /* MAYÚSCULAS automáticas */
+      transition: color var(--transicion);
+      /* Animación suave al hacer hover */
+    }
+
+    /* :hover = cuando el mouse está encima del elemento */
+    nav a:hover {
+      color: #1A6B8A;
+    }
+
+    /* ============================================================
+       HERO — La sección grande al inicio de la página
+       ============================================================ */
+    .hero {
+      height: 100vh;
+      /* Ocupa toda la pantalla */
+      display: flex;
+      flex-direction: column;
+      /* Apila elementos verticalmente */
+      justify-content: center;
+      align-items: flex-start;
+      /* Alineado a la izquierda */
+      padding: 0 4rem;
+      position: relative;
+      overflow: hidden;
+    }
+
+    /* Línea decorativa antes del subtítulo */
+    .hero-label {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      color: #1A6B8A;
+      font-size: 0.7rem;
+      letter-spacing: 0.3em;
+      text-transform: uppercase;
+      margin-bottom: 2rem;
+    }
+
+    /* La línea horizontal decorativa */
+    .hero-label::before {
+      content: '';
+      /* content vacío = elemento decorativo */
+      width: 40px;
+      height: 1px;
+      background: #1A6B8A;
+    }
+
+    /* Título principal grande */
+    .hero h1 {
+      font-family: var(--fuente-titulo);
+      font-size: clamp(3rem, 8vw, 7rem);
+      /* clamp = tamaño responsivo: mín, ideal, máx */
+      font-weight: 300;
+      line-height: 1.1;
+      margin-bottom: 1.5rem;
+      color: var(--color-texto);
+    }
+
+    /* La palabra en dorado dentro del h1 */
+    .hero h1 em {
+      font-style: italic;
+      color: #1A6B8A;
+    }
+
+    /* Párrafo de descripción en el hero */
+    .hero p {
+      font-size: 0.9rem;
+      color: var(--color-texto-suave);
+      max-width: 400px;
+      margin-bottom: 3rem;
+      letter-spacing: 0.05em;
+    }
+
+    /* Botón principal */
+    .btn-primario {
+      display: inline-block;
+      padding: 1rem 2.5rem;
+      border: 1px solid #1A6B8A;
+      color: #1A6B8A;
+      text-decoration: none;
+      font-size: 0.75rem;
+      letter-spacing: 0.25em;
+      text-transform: uppercase;
+      transition: all var(--transicion);
+      position: relative;
+      overflow: hidden;
+    }
+
+    /* Efecto de relleno al hacer hover en el botón */
+    .btn-primario::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      /* Empieza fuera del botón */
+      width: 100%;
+      height: 100%;
+      background: #1A6B8A;
+      transition: left var(--transicion);
+      z-index: -1;
+    }
+
+    .btn-primario:hover::before {
+      left: 0;
+      /* Se desliza hacia adentro */
+    }
+
+    .btn-primario:hover {
+      color: var(--color-fondo);
+    }
+
+    /* ============================================================
+       SECCIÓN DE GALERÍA
+       ============================================================ */
+    .galeria-seccion {
+      padding: 8rem 4rem;
+    }
+
+    /* Encabezado de sección */
+    .seccion-header {
+      margin-bottom: 4rem;
+    }
+
+    .seccion-label {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      color: #1A6B8A;
+      font-size: 0.7rem;
+      letter-spacing: 0.3em;
+      text-transform: uppercase;
+      margin-bottom: 1rem;
+    }
+
+    .seccion-label::before {
+      content: '';
+      width: 30px;
+      height: 1px;
+      background: #1A6B8A;
+    }
+
+    .seccion-header h2 {
+      font-family: var(--fuente-titulo);
+      font-size: clamp(2rem, 4vw, 3.5rem);
+      font-weight: 300;
+    }
+
+    /* ============================================================
+       FILTROS — Los botones para filtrar por tipo de técnica
+       ============================================================ */
+    .filtros {
+      display: flex;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+      /* flex-wrap = se acomoda en múltiples filas */
+      margin-bottom: 3rem;
+    }
+
+    /* Cada botón de filtro */
+    .filtro-btn {
+      padding: 0.5rem 1.5rem;
+      border: 1px solid var(--color-borde);
+      background: transparent;
+      color: var(--color-texto-suave);
+      font-family: var(--fuente-cuerpo);
+      font-size: 0.7rem;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      cursor: pointer;
+      /* cursor: pointer = el cursor se vuelve manito */
+      transition: all var(--transicion);
+    }
+
+    /* El botón activo (técnica seleccionada) */
+    .filtro-btn.activo {
+      border-color: #1A6B8A;
+      color: #1A6B8A;
+    }
+
+    .filtro-btn:hover {
+      border-color: var(--color-texto-suave);
+      color: var(--color-texto);
+    }
+
+    /* ============================================================
+       GRID DE PINTURAS
+       CSS Grid — el sistema más moderno para layouts en 2D
+       ============================================================ */
+    .grid-pinturas {
+      display: grid;
+      /*
+        grid-template-columns: repeat(auto-fill, minmax(280px, 1fr))
+        
+        auto-fill = crea tantas columnas como quepan
+        minmax(280px, 1fr) = cada columna mínimo 280px, máximo 1 fracción del espacio
+        
+        Resultado: layout responsivo automático sin media queries!
+        En pantalla grande → 4 columnas
+        En tablet → 2-3 columnas  
+        En celular → 1-2 columnas
+      */
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 1.5rem;
+    }
+
+    /* Cada tarjeta de pintura */
+    .pintura-card {
+      position: relative;
+      overflow: hidden;
+      cursor: pointer;
+      background: var(--color-superficie);
+      /*
+        aspect-ratio: define la proporción de la tarjeta
+        4/5 = más alta que ancha, ideal para pinturas en formato retrato
+      */
+      aspect-ratio: 4/5;
+      transition: transform var(--transicion);
+    }
+
+    /* La imagen dentro de la tarjeta */
+    .pintura-card img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      /* cover = llena el espacio sin distorsionar */
+      transition: transform 0.6s ease;
+      display: block;
+    }
+
+    /* Zoom suave al hacer hover */
+    .pintura-card:hover img {
+      transform: scale(1.05);
+    }
+
+    /* La capa oscura que aparece al hacer hover */
+    .pintura-overlay {
+      position: absolute;
+      inset: 0;
+      /* inset: 0 = top/right/bottom/left: 0 */
+      background: linear-gradient(to top,
+          rgba(0, 0, 0, 0.9) 0%,
+          rgba(0, 0, 0, 0.3) 50%,
+          transparent 100%);
+      opacity: 0;
+      transition: opacity var(--transicion);
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-end;
+      padding: 1.5rem;
+    }
+
+    /* Mostrar overlay al hacer hover en la tarjeta */
+    .pintura-card:hover .pintura-overlay {
+      opacity: 1;
+    }
+
+    /* Título de la pintura en el overlay */
+    .pintura-titulo {
+      font-family: var(--fuente-titulo);
+      font-size: 1.2rem;
+      font-weight: 400;
+      margin-bottom: 0.25rem;
+      transform: translateY(10px);
+      /* Empieza 10px abajo */
+      transition: transform var(--transicion);
+    }
+
+    .pintura-card:hover .pintura-titulo {
+      transform: translateY(0);
+      /* Sube a su posición al hacer hover */
+    }
+
+    /* Técnica y año */
+    .pintura-meta {
+      font-size: 0.7rem;
+      color: #1A6B8A;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      transform: translateY(10px);
+      transition: transform 0.5s ease;
+    }
+
+    .pintura-card:hover .pintura-meta {
+      transform: translateY(0);
+    }
+
+    /* ============================================================
+       LIGHTBOX — El visor que se abre al hacer clic en una pintura
+       ============================================================ */
+    .lightbox {
+      position: fixed;
+      /* Cubre toda la pantalla */
+      inset: 0;
+      background: rgba(0, 0, 0, 0.97);
+      z-index: 1000;
+      /* Encima de todo */
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      opacity: 0;
+      pointer-events: none;
+      /* pointer-events: none = no clickeable cuando está oculto */
+      transition: opacity 0.4s ease;
+    }
+
+    /* Clase que JS agrega para mostrar el lightbox */
+    .lightbox.abierto {
+      opacity: 1;
+      pointer-events: all;
+    }
+
+    /* Contenedor del lightbox */
+    .lightbox-contenido {
+      display: flex;
+      gap: 3rem;
+      max-width: 90vw;
+      max-height: 90vh;
+      align-items: center;
+    }
+
+    /* La imagen grande en el lightbox */
+    .lightbox-imagen {
+      max-height: 85vh;
+      max-width: 65vw;
+      object-fit: contain;
+      display: block;
+    }
+
+    /* Panel de información a la derecha */
+    .lightbox-info {
+      min-width: 250px;
+      max-width: 300px;
+    }
+
+    .lightbox-tecnica {
+      font-size: 0.65rem;
+      letter-spacing: 0.3em;
+      text-transform: uppercase;
+      color: #1A6B8A;
+      margin-bottom: 1rem;
+    }
+
+    .lightbox-titulo {
+      font-family: var(--fuente-titulo);
+      font-size: 2rem;
+      font-weight: 300;
+      line-height: 1.2;
+      margin-bottom: 0.5rem;
+    }
+
+    .lightbox-anio {
+      color: var(--color-texto-suave);
+      font-size: 0.8rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .lightbox-descripcion {
+      font-size: 0.85rem;
+      color: var(--color-texto-suave);
+      line-height: 1.8;
+      margin-bottom: 2rem;
+      border-top: 1px solid var(--color-borde);
+      padding-top: 1.5rem;
+    }
+
+    /* Miniaturas para ver las fotos de cerca/lejos de la misma pintura */
+    .lightbox-miniaturas {
+      display: flex;
+      gap: 0.5rem;
+      margin-bottom: 2rem;
+    }
+
+    .miniatura {
+      width: 50px;
+      height: 50px;
+      object-fit: cover;
+      opacity: 0.5;
+      cursor: pointer;
+      border: 1px solid transparent;
+      transition: all 0.3s ease;
+    }
+
+    .miniatura.activa,
+    .miniatura:hover {
+      opacity: 1;
+      border-color: #1A6B8A;
+    }
+
+    /* Botón de cerrar el lightbox */
+    .lightbox-cerrar {
+      position: absolute;
+      top: 2rem;
+      right: 2rem;
+      background: none;
+      border: none;
+      color: var(--color-texto-suave);
+      font-size: 1.5rem;
+      cursor: pointer;
+      transition: color var(--transicion);
+      width: 40px;
+      height: 40px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .lightbox-cerrar:hover {
+      color: var(--color-texto);
+    }
+
+    /* Botones de navegación anterior/siguiente */
+    .lightbox-nav {
+      position: absolute;
+      top: 50%;
+      transform: translateY(-50%);
+      background: none;
+      border: 1px solid var(--color-borde);
+      color: var(--color-texto);
+      width: 50px;
+      height: 50px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.2rem;
+      transition: all var(--transicion);
+    }
+
+    .lightbox-nav:hover {
+      border-color: #1A6B8A;
+      color: #1A6B8A;
+    }
+
+    .lightbox-prev {
+      left: 2rem;
+    }
+
+    .lightbox-next {
+      right: 2rem;
+    }
+
+    /* ============================================================
+       FOOTER
+       ============================================================ */
+    footer {
+      border-top: 1px solid var(--color-borde);
+      padding: 3rem 4rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      color: var(--color-texto-suave);
+      font-size: 0.75rem;
+      letter-spacing: 0.1em;
+    }
+
+    /* ============================================================
+       RESPONSIVE — Adaptación para celulares
+       @media = "si la pantalla mide menos de X, aplica estos estilos"
+       ============================================================ */
+    @media (max-width: 768px) {
+      header {
+        padding: 1.2rem 1.5rem;
+      }
+
+      nav {
+        gap: 1.2rem;
+      }
+
+      .hero,
+      .galeria-seccion {
+        padding-left: 1.5rem;
+        padding-right: 1.5rem;
+      }
+
+      .lightbox-contenido {
+        flex-direction: column;
+        /* En celular, imagen arriba e info abajo */
+        overflow-y: auto;
+      }
+
+      .lightbox-imagen {
+        max-width: 90vw;
+        max-height: 50vh;
+      }
+
+      footer {
+        flex-direction: column;
+        gap: 1rem;
+        text-align: center;
+        padding: 2rem 1.5rem;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- ============================================================
+    HEADER
+    El <header> es una etiqueta semántica — le dice al navegador
+    y a Google que esto es el encabezado de la página.
+    
+    Etiquetas semánticas importantes:
+    <header>   = encabezado
+    <nav>      = navegación
+    <main>     = contenido principal
+    <section>  = sección de contenido
+    <footer>   = pie de página
+    <article>  = contenido independiente
+    
+    Usando etiquetas semánticas tu sitio:
+    ✓ Aparece mejor en Google (SEO)
+    ✓ Funciona mejor con lectores de pantalla (accesibilidad)
+    ✓ Es más fácil de mantener
+  ============================================================ -->
+  <header>
+    <!-- href="#" = link que no va a ningún lado (por ahora) -->
+    <a href="#" class="logo">
+      Tu <span>Nombre</span>
+      <!-- ↑ Cambia "Tu Nombre" por tu nombre real -->
+    </a>
+
+    <nav>
+      <!-- href="#galeria" = navega a la sección con id="galeria" en esta misma página -->
+      <a href="#galeria">Obras</a>
+      <a href="#sobre-mi">Sobre mí</a>
+      <a href="#contacto">Contacto</a>
+    </nav>
+  </header>
+
+  <!-- ============================================================
+    MAIN — El contenido principal de la página
+  ============================================================ -->
+  <main>
+
+    <!-- HERO SECTION -->
+    <section class="hero" id="inicio">
+      <div class="hero-label">Artista Visual</div>
+
+      <h1>
+        Arte que<br>
+        <em>trasciende</em><br>
+        la forma
+        <!-- ↑ Cambia esto por tu frase personal -->
+      </h1>
+
+      <p>
+        Óleo, acrílico, grafito y técnicas mixtas.<br>
+        Cada obra, una exploración.
+        <!-- ↑ Tu descripción personal -->
+      </p>
+
+      <a href="#galeria" class="btn-primario">Ver obras</a>
+    </section>
+
+    <!-- GALERÍA SECTION -->
+    <!--
+      id="galeria" → así el link href="#galeria" del nav sabe a dónde ir
+    -->
+    <section class="galeria-seccion" id="galeria">
+
+      <div class="seccion-header">
+        <div class="seccion-label">Colección</div>
+        <h2>Obras Recientes</h2>
+      </div>
+
+      <!-- FILTROS DE TÉCNICA
+           Los botones para filtrar el tipo de obra
+           data-filtro = atributo personalizado que JS leerá para filtrar -->
+      <div class="filtros">
+        <button class="filtro-btn activo" data-filtro="todos">Todas</button>
+        <button class="filtro-btn" data-filtro="oleo">Óleo</button>
+        <button class="filtro-btn" data-filtro="acrilico">Acrílico</button>
+        <button class="filtro-btn" data-filtro="grafito">Grafito</button>
+        <button class="filtro-btn" data-filtro="mixto">Técnica Mixta</button>
+      </div>
+
+      <!-- GRID DE PINTURAS
+           Aquí van las tarjetas de cada pintura.
+           
+           Cada tarjeta tiene estos atributos importantes:
+           - data-tecnica: para los filtros
+           - data-id: identificador único (JS lo usa para el lightbox)
+           
+           Cuando tengas tus fotos reales, reemplaza:
+           - src="..." con la ruta a tu imagen
+           - Los títulos, técnicas y descripciones
+      -->
+      <div class="grid-pinturas" id="grid">
+
+        <!-- PINTURA 1 -->
+        <!--
+          onclick="abrirLightbox(0)" → llama a la función JS con índice 0
+          El índice debe coincidir con el array de datos en el JS
+        -->
+        <div class="pintura-card" data-tecnica="oleo" onclick="abrirLightbox(0)">
+          <!--
+            Las imágenes de placeholder son rectangulos de color.
+            Formato: https://placehold.co/ANCHO x ALTO/COLOR_FONDO/COLOR_TEXTO
+            Reemplaza con tus imágenes reales:
+            <img src="imagenes/oleo/pintura1-principal.jpg" alt="Nombre de la obra">
+          -->
+          <img src="https://placehold.co/400x500/1a1a1a/1A6B8A?text=Óleo+I" alt="Composición en Rojo">
+          <div class="pintura-overlay">
+            <div class="pintura-titulo">Composición en Rojo</div>
+            <div class="pintura-meta">Óleo · 2024</div>
+          </div>
+        </div>
+
+        <!-- PINTURA 2 -->
+        <div class="pintura-card" data-tecnica="grafito" onclick="abrirLightbox(1)">
+          <img src="https://placehold.co/400x500/111111/8a8279?text=Grafito+I" alt="Estudio de Sombras">
+          <div class="pintura-overlay">
+            <div class="pintura-titulo">Estudio de Sombras</div>
+            <div class="pintura-meta">Grafito · 2024</div>
+          </div>
+        </div>
+
+        <!-- PINTURA 3 -->
+        <div class="pintura-card" data-tecnica="acrilico" onclick="abrirLightbox(2)">
+          <img src="https://placehold.co/400x500/0d1117/6b9ec7?text=Acrílico+I" alt="Mar Nocturno">
+          <div class="pintura-overlay">
+            <div class="pintura-titulo">Mar Nocturno</div>
+            <div class="pintura-meta">Acrílico · 2024</div>
+          </div>
+        </div>
+
+        <!-- PINTURA 4 -->
+        <div class="pintura-card" data-tecnica="mixto" onclick="abrirLightbox(3)">
+          <img src="https://placehold.co/400x500/131008/b5a050?text=Mixto+I" alt="Tierra y Tiempo">
+          <div class="pintura-overlay">
+            <div class="pintura-titulo">Tierra y Tiempo</div>
+            <div class="pintura-meta">Técnica Mixta · 2023</div>
+          </div>
+        </div>
+
+        <!-- PINTURA 5 -->
+        <div class="pintura-card" data-tecnica="oleo" onclick="abrirLightbox(4)">
+          <img src="https://placehold.co/400x500/1a1208/1A6B8A?text=Óleo+II" alt="Luz de Tarde">
+          <div class="pintura-overlay">
+            <div class="pintura-titulo">Luz de Tarde</div>
+            <div class="pintura-meta">Óleo · 2023</div>
+          </div>
+        </div>
+
+        <!-- PINTURA 6 -->
+        <div class="pintura-card" data-tecnica="grafito" onclick="abrirLightbox(5)">
+          <img src="https://placehold.co/400x500/0e0e0e/9a9a9a?text=Grafito+II" alt="Retrato I">
+          <div class="pintura-overlay">
+            <div class="pintura-titulo">Retrato I</div>
+            <div class="pintura-meta">Grafito · 2023</div>
+          </div>
+        </div>
+
+      </div>
+      <!-- fin .grid-pinturas -->
+
+    </section>
+    <!-- fin #galeria -->
+
+  </main>
+
+  <!-- FOOTER -->
+  <footer>
+    <div>© 2024 Tu Nombre. Todos los derechos reservados.</div>
+    <div>Hecho con HTML, CSS & JS</div>
+  </footer>
+
+  <!-- ============================================================
+    LIGHTBOX HTML
+    El lightbox vive aquí pero está INVISIBLE por defecto (opacity: 0)
+    JS lo hace visible cuando haces clic en una pintura
+  ============================================================ -->
+  <div class="lightbox" id="lightbox">
+
+    <!-- Botón X para cerrar -->
+    <button class="lightbox-cerrar" onclick="cerrarLightbox()">✕</button>
+
+    <!-- Botón Anterior -->
+    <button class="lightbox-nav lightbox-prev" onclick="navegarLightbox(-1)">‹</button>
+
+    <!-- Contenido principal del lightbox -->
+    <div class="lightbox-contenido">
+
+      <!-- La imagen grande -->
+      <img class="lightbox-imagen" id="lb-imagen" src="" alt="">
+
+      <!-- Panel de información -->
+      <div class="lightbox-info">
+        <div class="lightbox-tecnica" id="lb-tecnica"></div>
+        <div class="lightbox-titulo" id="lb-titulo"></div>
+        <div class="lightbox-anio" id="lb-anio"></div>
+
+        <!-- Miniaturas (fotos de cerca, lejos, detalles) -->
+        <div class="lightbox-miniaturas" id="lb-miniaturas"></div>
+
+        <p class="lightbox-descripcion" id="lb-descripcion"></p>
+      </div>
+
+    </div>
+
+    <!-- Botón Siguiente -->
+    <button class="lightbox-nav lightbox-next" onclick="navegarLightbox(1)">›</button>
+
+  </div>
+  <!-- fin .lightbox -->
+
+
+  <!-- ============================================================
+    JAVASCRIPT
+    
+    Siempre al FINAL del body, para que el HTML cargue primero.
+    
+    JS es el que hace que la página sea interactiva:
+    - Filtra las pinturas por técnica
+    - Abre y cierra el lightbox
+    - Navega entre pinturas
+    - Cambia entre fotos de la misma pintura (cerca/lejos)
+  ============================================================ -->
+  <script>
+
+    /*
+      ============================================================
+      BASE DE DATOS DE PINTURAS
+      
+      En JavaScript, un Array [] es una lista.
+      Un Object {} es un conjunto de propiedades clave: valor.
+      
+      Aquí tenemos un ARRAY de OBJETOS — cada objeto es una pintura.
+      
+      Cuando tengas tus fotos reales, solo cambias las rutas aquí
+      y todo el resto funciona automáticamente.
+      ============================================================
+    */
+    const pinturas = [
+      {
+        id: 0,
+        titulo: "Composición en Rojo",
+        tecnica: "Óleo sobre tela",
+        anio: "2024",
+        descripcion: "Una exploración del color y la forma a través de capas de óleo. La textura visible del pincel crea profundidad y movimiento en la superficie.",
+        /*
+          fotos: Array con las diferentes fotografías de esta pintura
+          La primera es la vista general, las siguientes son detalles
+          Cuando tengas tus fotos reales:
+          fotos: [
+            "imagenes/oleo/composicion-rojo-general.jpg",
+            "imagenes/oleo/composicion-rojo-detalle1.jpg",
+            "imagenes/oleo/composicion-rojo-detalle2.jpg"
+          ]
+        */
+        fotos: [
+          "https://placehold.co/800x1000/1a1a1a/1A6B8A?text=General",
+          "https://placehold.co/800x1000/1a0a0a/1A6B8A?text=Detalle+1+(cerca)",
+          "https://placehold.co/800x1000/0a1a0a/1A6B8A?text=Detalle+2+(textura)"
+        ]
+      },
+      {
+        id: 1,
+        titulo: "Estudio de Sombras",
+        tecnica: "Grafito sobre papel",
+        anio: "2024",
+        descripcion: "Serie de estudios explorando cómo la luz define la forma. Técnica de sombreado por capas con lápices de diferente dureza.",
+        fotos: [
+          "https://placehold.co/800x1000/111111/8a8279?text=General",
+          "https://placehold.co/800x1000/111111/aaaaaa?text=Detalle+trazo"
+        ]
+      },
+      {
+        id: 2,
+        titulo: "Mar Nocturno",
+        tecnica: "Acrílico sobre tela",
+        anio: "2024",
+        descripcion: "El mar en la madrugada. Capas de acrílico azul construyen la profundidad del agua bajo la luz lunar.",
+        fotos: [
+          "https://placehold.co/800x1000/0d1117/6b9ec7?text=General",
+          "https://placehold.co/800x1000/050a10/4a7ea0?text=Olas+(detalle)"
+        ]
+      },
+      {
+        id: 3,
+        titulo: "Tierra y Tiempo",
+        tecnica: "Técnica Mixta (lodo, café, tiza)",
+        anio: "2023",
+        descripcion: "Materiales orgánicos que hablan de origen. Lodo, café y tiza crean una superficie con textura y historia.",
+        fotos: [
+          "https://placehold.co/800x1000/131008/b5a050?text=General",
+          "https://placehold.co/800x1000/0a0805/9a8040?text=Textura+(muy+cerca)"
+        ]
+      },
+      {
+        id: 4,
+        titulo: "Luz de Tarde",
+        tecnica: "Óleo sobre tabla",
+        anio: "2023",
+        descripcion: "La luz dorada de la tarde. Veladuras de óleo transparente construyen la luminosidad característica de esa hora.",
+        fotos: [
+          "https://placehold.co/800x1000/1a1208/1A6B8A?text=General",
+          "https://placehold.co/800x1000/120e05/b8954a?text=Veladura+(detalle)"
+        ]
+      },
+      {
+        id: 5,
+        titulo: "Retrato I",
+        tecnica: "Grafito y carboncillo",
+        anio: "2023",
+        descripcion: "Primer retrato de la serie. Combinación de grafito para línea y carboncillo para las masas de sombra.",
+        fotos: [
+          "https://placehold.co/800x1000/0e0e0e/9a9a9a?text=General",
+          "https://placehold.co/800x1000/080808/cccccc?text=Ojos+(detalle)"
+        ]
+      }
+    ];
+
+    /*
+      ============================================================
+      VARIABLES GLOBALES DE ESTADO
+      
+      Estas variables "recuerdan" qué está pasando en la aplicación.
+      Es el concepto de ESTADO — muy importante en desarrollo web.
+      ============================================================
+    */
+    let pinturaActual = 0;    // Índice de la pintura abierta en el lightbox
+    let fotoActual = 0;       // Índice de la foto activa dentro de esa pintura
+
+    /*
+      ============================================================
+      FUNCIÓN: abrirLightbox
+      
+      Se llama cuando el usuario hace clic en una pintura.
+      Recibe el índice de la pintura (0, 1, 2...)
+      
+      Parámetros:
+        indice → número que identifica qué pintura abrir
+      ============================================================
+    */
+    function abrirLightbox(indice) {
+      // Guardar qué pintura estamos viendo
+      pinturaActual = indice;
+      fotoActual = 0;  // Siempre empieza con la primera foto (la vista general)
+
+      // Llamar a la función que actualiza el contenido visual
+      actualizarLightbox();
+
+      /*
+        document.getElementById → busca un elemento HTML por su id
+        classList.add → agrega una clase CSS al elemento
+        Al agregar la clase "abierto", el CSS la hace visible (opacity: 1)
+      */
+      document.getElementById('lightbox').classList.add('abierto');
+
+      /*
+        Bloquea el scroll de la página mientras el lightbox está abierto
+        Es mejor experiencia de usuario — el fondo no se mueve
+      */
+      document.body.style.overflow = 'hidden';
+    }
+
+    /*
+      ============================================================
+      FUNCIÓN: cerrarLightbox
+      ============================================================
+    */
+    function cerrarLightbox() {
+      document.getElementById('lightbox').classList.remove('abierto');
+      document.body.style.overflow = '';  // Restaura el scroll
+    }
+
+    /*
+      ============================================================
+      FUNCIÓN: actualizarLightbox
+      
+      Toma los datos de la pintura actual y los pone en el HTML.
+      Esto es el concepto de RENDERIZADO — dibujar datos en pantalla.
+      ============================================================
+    */
+    function actualizarLightbox() {
+      // Obtener el objeto de la pintura actual del array
+      const pintura = pinturas[pinturaActual];
+
+      /*
+        document.getElementById('lb-imagen') → obtiene el elemento <img>
+        .src = ... → cambia el atributo src (la imagen que muestra)
+        .textContent = ... → cambia el texto del elemento
+      */
+      document.getElementById('lb-imagen').src = pintura.fotos[fotoActual];
+      document.getElementById('lb-imagen').alt = pintura.titulo;
+      document.getElementById('lb-titulo').textContent = pintura.titulo;
+      document.getElementById('lb-tecnica').textContent = pintura.tecnica;
+      document.getElementById('lb-anio').textContent = pintura.anio;
+      document.getElementById('lb-descripcion').textContent = pintura.descripcion;
+
+      // Construir las miniaturas dinámicamente
+      construirMiniaturas(pintura);
+    }
+
+    /*
+      ============================================================
+      FUNCIÓN: construirMiniaturas
+      
+      Crea los elementos HTML de las miniaturas (fotos de cerca/lejos)
+      programáticamente — esto es GENERACIÓN DINÁMICA de HTML con JS.
+      
+      Parámetros:
+        pintura → el objeto de la pintura actual
+      ============================================================
+    */
+    function construirMiniaturas(pintura) {
+      const contenedor = document.getElementById('lb-miniaturas');
+
+      /*
+        innerHTML = '' → vacía el contenedor antes de llenarlo de nuevo
+        Esto evita que las miniaturas se dupliquen cada vez
+      */
+      contenedor.innerHTML = '';
+
+      /*
+        forEach → itera sobre cada elemento del array
+        (foto, indice) → parámetros: el elemento actual y su posición
+        
+        Es como un for loop pero más moderno:
+        for (let i = 0; i < pintura.fotos.length; i++) { ... }
+      */
+      pintura.fotos.forEach((foto, indice) => {
+        /*
+          document.createElement → crea un nuevo elemento HTML
+          No está en la página todavía, solo en memoria
+        */
+        const img = document.createElement('img');
+        img.src = foto;
+        img.alt = `Vista ${indice + 1}`;
+        img.className = 'miniatura' + (indice === fotoActual ? ' activa' : '');
+
+        /*
+          addEventListener → escucha un evento (en este caso 'click')
+          Cuando el usuario hace clic en la miniatura, ejecuta la función
+        */
+        img.addEventListener('click', () => cambiarFoto(indice));
+
+        /*
+          appendChild → agrega el elemento al contenedor
+          Ahora sí aparece en la página
+        */
+        contenedor.appendChild(img);
+      });
+    }
+
+    /*
+      ============================================================
+      FUNCIÓN: cambiarFoto
+      
+      Cambia entre las fotos de la misma pintura (cerca, lejos, textura)
+      
+      Parámetros:
+        indice → número de la foto a mostrar
+      ============================================================
+    */
+    function cambiarFoto(indice) {
+      fotoActual = indice;
+      const pintura = pinturas[pinturaActual];
+
+      // Cambiar la imagen principal
+      document.getElementById('lb-imagen').src = pintura.fotos[fotoActual];
+
+      // Actualizar cuál miniatura está activa visualmente
+      /*
+        querySelectorAll → selecciona TODOS los elementos con esa clase
+        Devuelve una NodeList (como un array)
+      */
+      const miniaturas = document.querySelectorAll('.miniatura');
+      miniaturas.forEach((min, i) => {
+        /*
+          classList.toggle(clase, condicion)
+          Si condicion es true → agrega la clase
+          Si condicion es false → la quita
+        */
+        min.classList.toggle('activa', i === indice);
+      });
+    }
+
+    /*
+      ============================================================
+      FUNCIÓN: navegarLightbox
+      
+      Pasa a la pintura anterior o siguiente.
+      
+      Parámetros:
+        direccion → -1 para anterior, +1 para siguiente
+      ============================================================
+    */
+    function navegarLightbox(direccion) {
+      /*
+        % pinturas.length → operador módulo, hace que el índice
+        vuelva al principio cuando llega al final (navegación circular)
+        
+        Ejemplo con 6 pinturas:
+        (5 + 1) % 6 = 0  → vuelve al inicio
+        (0 - 1 + 6) % 6 = 5  → va al final desde el inicio
+      */
+      pinturaActual = (pinturaActual + direccion + pinturas.length) % pinturas.length;
+      fotoActual = 0;
+      actualizarLightbox();
+    }
+
+    /*
+      ============================================================
+      FILTROS — Filtrar pinturas por técnica
+      ============================================================
+    */
+
+    // Seleccionar todos los botones de filtro
+    const filtrosBtns = document.querySelectorAll('.filtro-btn');
+
+    /*
+      Agregar click listener a cada botón de filtro
+    */
+    filtrosBtns.forEach(btn => {
+      btn.addEventListener('click', () => {
+        // Quitar clase "activo" de todos los botones
+        filtrosBtns.forEach(b => b.classList.remove('activo'));
+
+        // Agregar clase "activo" solo al botón clickeado
+        btn.classList.add('activo');
+
+        // Obtener el valor del filtro del atributo data-filtro
+        const filtro = btn.dataset.filtro;
+
+        // Filtrar las tarjetas
+        filtrarPinturas(filtro);
+      });
+    });
+
+    /*
+      ============================================================
+      FUNCIÓN: filtrarPinturas
+      
+      Muestra u oculta tarjetas según la técnica seleccionada
+      
+      Parámetros:
+        filtro → string con la técnica ('todos', 'oleo', 'grafito', etc.)
+      ============================================================
+    */
+    function filtrarPinturas(filtro) {
+      // Seleccionar todas las tarjetas
+      const tarjetas = document.querySelectorAll('.pintura-card');
+
+      tarjetas.forEach(tarjeta => {
+        /*
+          tarjeta.dataset.tecnica → lee el atributo data-tecnica del HTML
+          
+          Si el filtro es 'todos' O la técnica coincide → mostrar
+          Si no → ocultar
+        */
+        const mostrar = filtro === 'todos' || tarjeta.dataset.tecnica === filtro;
+
+        /*
+          style.display → controla si el elemento se muestra o no
+          'block' → visible
+          'none' → invisible y sin espacio
+          
+          En una versión más avanzada usaríamos animaciones CSS para esto
+        */
+        tarjeta.style.display = mostrar ? 'block' : 'none';
+      });
+    }
+
+    /*
+      ============================================================
+      EVENTO: Cerrar lightbox con la tecla Escape
+      
+      document → el objeto que representa toda la página
+      addEventListener('keydown') → escucha teclas presionadas
+      ============================================================
+    */
+    document.addEventListener('keydown', (evento) => {
+      // evento.key → qué tecla se presionó
+      if (evento.key === 'Escape') cerrarLightbox();
+      if (evento.key === 'ArrowLeft') navegarLightbox(-1);
+      if (evento.key === 'ArrowRight') navegarLightbox(1);
+    });
+
+    /*
+      ============================================================
+      EVENTO: Cerrar lightbox al hacer clic en el fondo oscuro
+      ============================================================
+    */
+    document.getElementById('lightbox').addEventListener('click', (evento) => {
+      /*
+        evento.target → el elemento que recibió el clic
+        Si el clic fue directo en el lightbox (el fondo oscuro)
+        y no en los elementos de adentro → cerrar
+      */
+      if (evento.target.id === 'lightbox') cerrarLightbox();
+    });
+
+  </script>
+
+  <!-- Three.js desde CDN — no necesitas instalar nada -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+
+  <div id="sala3d" style="width:100%; height:100vh; display:block;"></div>
+
+  <script>
+    // 1. LOS TRES ELEMENTOS BÁSICOS
+    const escena = new THREE.Scene();
+    escena.background = new THREE.Color(0x0a0a0a); // negro como tu galería
+
+    const camara = new THREE.PerspectiveCamera(
+      75,                                    // ángulo de visión (como un lente)
+      window.innerWidth / window.innerHeight, // proporción pantalla
+      0.1,                                   // qué tan cerca ve
+      1000                                   // qué tan lejos ve
+    );
+    camara.position.set(0, 1.6, 5); // altura de persona parada
+
+    const renderer = new THREE.WebGLRenderer({ antialias: true });
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    document.getElementById('sala3d').appendChild(renderer.domElement);
+
+    // 2. LA SALA — piso, techo, paredes
+    const piso = new THREE.Mesh(
+      new THREE.PlaneGeometry(20, 20),
+      new THREE.MeshStandardMaterial({ color: 0x141414 })
+    );
+    piso.rotation.x = -Math.PI / 2;
+    escena.add(piso);
+
+    const pared = new THREE.Mesh(
+      new THREE.PlaneGeometry(20, 8),
+      new THREE.MeshStandardMaterial({ color: 0x1a1a1a })
+    );
+    pared.position.z = -8;
+    pared.position.y = 4;
+    escena.add(pared);
+
+    // 3. LUZ — sin luz no se ve nada en 3D
+    const luzAmbiente = new THREE.AmbientLight(0xffffff, 0.3);
+    escena.add(luzAmbiente);
+
+    const luzPrincipal = new THREE.PointLight(0x1A6B8A, 2, 20); // azul maya!
+    luzPrincipal.position.set(0, 5, 0);
+    escena.add(luzPrincipal);
+
+    // 4. CUADRO EN LA PARED (placeholder de tu pintura)
+    const cuadro = new THREE.Mesh(
+      new THREE.PlaneGeometry(3, 4),
+      new THREE.MeshStandardMaterial({ color: 0x1A6B8A })
+    );
+    cuadro.position.set(0, 3, -7.9);
+    escena.add(cuadro);
+
+    // 5. MOVIMIENTO CON TECLADO
+    const teclas = {};
+
+    // ROTAR CÁMARA CON EL MOUSE
+    let mouseX = 0;
+    let mouseY = 0;
+
+    document.addEventListener('mousemove', (e) => {
+      // Convertir posición del mouse a rotación
+      mouseX = (e.clientX / window.innerWidth - 0.5) * 2;
+      mouseY = (e.clientY / window.innerHeight - 0.5) * 2;
+    });
+
+
+
+    document.addEventListener('keydown', e => teclas[e.key] = true);
+    document.addEventListener('keyup', e => teclas[e.key] = false);
+
+    // 6. EL LOOP — como un while(true) que dibuja 60 veces por segundo
+    function animar() {
+      requestAnimationFrame(animar);
+
+      // Mover cámara con flechas o WASD
+      if (teclas['ArrowUp'] || teclas['w']) camara.position.z -= 0.05;
+      if (teclas['ArrowDown'] || teclas['s']) camara.position.z += 0.05;
+      if (teclas['ArrowLeft'] || teclas['a']) camara.position.x -= 0.05;
+      if (teclas['ArrowRight'] || teclas['d']) camara.position.x += 0.05;
+
+      // Y dentro del loop animar(), antes de renderer.render:
+      camara.rotation.y = -mouseX * Math.PI * 0.5; // mirar izq/der
+      camara.rotation.x = -mouseY * Math.PI * 0.2; // mirar arriba/abajo
+
+      renderer.render(escena, camara);
+    }
+
+    animar();
+  </script>
+
+
+
+
+
+
+
+</body>
+
+</html>
