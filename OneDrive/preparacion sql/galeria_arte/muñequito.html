@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Muñequito en sala</title>
+    <style>
+        body {
+            margin: 0;
+            background: #0a0a0a;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+
+        canvas {
+            border: 1px solid #1A6B8A;
+        }
+    </style>
+</head>
+
+<body>
+
+    <canvas id="sala" width="800" height="500"></canvas>
+
+    <script>
+        const canvas = document.getElementById('sala');
+        const ctx = canvas.getContext('2d');
+
+        // MUÑEQUITO — su posición
+        const munequito = {
+            x: 400,
+            y: 350,
+            velocidad: 3
+        };
+
+        // TECLAS presionadas
+        const teclas = {};
+        document.addEventListener('keydown', e => teclas[e.key] = true);
+        document.addEventListener('keyup', e => teclas[e.key] = false);
+
+        function dibujar() {
+            // Limpiar pantalla
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            // SALA — piso y paredes
+            ctx.fillStyle = '#141414';
+            ctx.fillRect(0, 0, 800, 500);
+
+            // Pared del fondo
+            ctx.fillStyle = '#1a1a1a';
+            ctx.fillRect(0, 0, 800, 300);
+
+            // CUADROS en la pared
+            // Cuadro 1
+            ctx.fillStyle = '#1A6B8A'; // azul maya
+            ctx.fillRect(100, 80, 120, 150);
+            ctx.strokeStyle = '#c9a96e';
+            ctx.lineWidth = 3;
+            ctx.strokeRect(100, 80, 120, 150);
+
+            // Cuadro 2
+            ctx.fillStyle = '#4a3728';
+            ctx.fillRect(340, 80, 120, 150);
+            ctx.strokeStyle = '#c9a96e';
+            ctx.strokeRect(340, 80, 120, 150);
+
+            // Cuadro 3
+            ctx.fillStyle = '#2a4a28';
+            ctx.fillRect(580, 80, 120, 150);
+            ctx.strokeStyle = '#c9a96e';
+            ctx.strokeRect(580, 80, 120, 150);
+
+            // MUÑEQUITO
+            ctx.fillStyle = '#e8e0d5';
+            // Cabeza
+            ctx.beginPath();
+            ctx.arc(munequito.x, munequito.y - 40, 12, 0, Math.PI * 2);
+            ctx.fill();
+            // Cuerpo
+            ctx.fillRect(munequito.x - 8, munequito.y - 28, 16, 30);
+            // Piernas
+            ctx.fillRect(munequito.x - 8, munequito.y + 2, 6, 20);
+            ctx.fillRect(munequito.x + 2, munequito.y + 2, 6, 20);
+
+            // MOVER con teclas
+            if (teclas['ArrowLeft'] || teclas['a']) munequito.x -= munequito.velocidad;
+            if (teclas['ArrowRight'] || teclas['d']) munequito.x += munequito.velocidad;
+            if (teclas['ArrowUp'] || teclas['w']) munequito.y -= munequito.velocidad;
+            if (teclas['ArrowDown'] || teclas['s']) munequito.y += munequito.velocidad;
+
+            // Loop — 60 veces por segundo
+            requestAnimationFrame(dibujar);
+        }
+
+        dibujar();
+    </script>
+
+</body>
+
+</html>
