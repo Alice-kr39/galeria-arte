@@ -34,7 +34,8 @@ public class Galeria extends JPanel implements ActionListener, KeyListener {
     boolean izq, der, arr, abj;
 
     // Imágenes de los cuadros
-    BufferedImage imgCristo, imgTotoro, imgVango;
+    // BufferedImage imgCristo, imgTotoro, imgVango;
+    BufferedImage imgCristo, imgTotoro, imgVango, imgMarco;
 
     public Galeria() {
         setPreferredSize(new Dimension(ANCHO, ALTO));
@@ -46,6 +47,7 @@ public class Galeria extends JPanel implements ActionListener, KeyListener {
         imgCristo = cargarImagen("cristo.jpeg");
         imgTotoro = cargarImagen("totoro.jpeg");
         imgVango = cargarImagen("vango.jpeg");
+        imgMarco = cargarPNG("marco_transparente.png");
 
         // Timer a 60 FPS (~16ms por frame)
         Timer timer = new Timer(16, this);
@@ -63,8 +65,46 @@ public class Galeria extends JPanel implements ActionListener, KeyListener {
 
     }
 
+    BufferedImage cargarPNG(String ruta) {
+        try {
+            BufferedImage src = ImageIO.read(new File(ruta));
+            BufferedImage img = new BufferedImage(
+                    src.getWidth(), src.getHeight(),
+                    BufferedImage.TYPE_INT_ARGB // canal alfa
+            );
+            Graphics2D g = img.createGraphics();
+            g.drawImage(src, 0, 0, null);
+            g.dispose();
+            return img;
+        } catch (Exception e) {
+            System.out.println("No se encontró: " + ruta);
+            return null;
+        }
+    }
+
     // Dibuja un cuadro con su imagen (o placeholder) y marco dorado
-    void dibujarCuadro(Graphics2D g, BufferedImage img, int x, int y, int w, int h, boolean vendido) {
+
+    void dibujarCuadro(Graphics2D g, BufferedImage img, BufferedImage marco, int x, int y, int w, int h,
+            boolean vendido) {
+
+        // Marco más grande encima
+        if (marco != null) {
+            g.drawImage(marco, x - 25, y - 25, w + 50, h + 50, null);
+
+        } /*
+           * else {
+           * 
+           * 
+           * Si no hay marco, dibujar uno simple
+           * g.setColor(DORADO);
+           * g.fillRect(x - 25, y - 25, w + 50, h + 50);
+           * g.setColor(new Color(160, 130, 80));
+           * g.fillRect(x - 20, y - 20, w + 40, h + 40);
+           * 
+           * 
+           * }
+           */
+
         if (img != null) {
             g.drawImage(img, x, y, w, h, null);
         } else {
@@ -75,11 +115,6 @@ public class Galeria extends JPanel implements ActionListener, KeyListener {
             g.setFont(new Font("Arial", Font.PLAIN, 11));
             g.drawString("sin imagen", x + 18, y + h / 2);
         }
-
-        // Marco dorado
-        g.setColor(DORADO);
-        g.setStroke(new BasicStroke(3));
-        g.drawRect(x, y, w, h);
 
         // Punto rojo de vendido (como el Totoro 🔴)
         if (vendido) {
@@ -140,17 +175,66 @@ public class Galeria extends JPanel implements ActionListener, KeyListener {
 
         // Cuadros: Cristo | Totoro (vendido 🔴) | Van Gogh
 
-        dibujarCuadro(g, imgCristo, 150, 100, 120, 150, false);
-        dibujarCuadro(g, imgTotoro, 540, 100, 120, 150, true);
-        dibujarCuadro(g, imgVango, 930, 100, 120, 150, false);
+        /*
+         * esta duplicando Quitando esa llamada eliminaste la “sombra gigante” que se
+         * estaba dibujando detrás. Era como si cada cuadro tuviera su gemelo inflado
+         * viviendo en otra dimensión 😄
+         * 
+         * dibujarCuadro(g, imgCristo, imgMarco, rCristo.x - 25, rCristo.y - 25,
+         * rCristo.width + 50, rCristo.height + 50,
+         * false);
+         * dibujarCuadro(g, imgTotoro, imgMarco, rTotoro.x - 25, rTotoro.y - 25,
+         * rTotoro.width + 50, rTotoro.height + 50,
+         * true);
+         * dibujarCuadro(g, imgVango, imgMarco, rVango.x - 25, rVango.y - 25,
+         * rVango.width + 50, rVango.height + 50,
+         * false);
+         */
 
+        // Pasillo en perspectiva con polígonos
+        int px = 1100, py = 150;
+        int pw = 80, ph = 180;
+
+        // Fondo del pasillo
+        g.setColor(new Color(15, 10, 8));
+        g.fillRect(px + 20, py + 40, 40, 70);
+
+        // Pared izquierda del pasillo (trapecio)
+        int[] xIzq = { px, px, px + 30, px + 30 };
+        int[] yIzq = { py, py + ph, py + ph - 50, py + 50 };
+        g.setColor(new Color(35, 22, 12));
+        g.fillPolygon(xIzq, yIzq, 4);
+
+        // Pared derecha del pasillo (trapecio)
+        int[] xDer = { px + pw, px + pw, px + 70, px + 70 };
+        int[] yDer = { py, py + ph, py + ph - 50, py + 50 };
+        g.fillPolygon(xDer, yDer, 4);
+
+        // Techo del pasillo (trapecio)
+        int[] xTech = { px, px + pw, px + 70, px + 30 };
+        int[] yTech = { py, py, py + 50, py + 50 };
+        g.setColor(new Color(25, 15, 8));
+        g.fillPolygon(xTech, yTech, 4);
+
+        // Luz al fondo
+        g.setColor(new Color(70, 50, 30));
+        g.fillRect(px + 25, py + 50, 50, 80);
+
+        // Arco
+        g.setColor(new Color(60, 40, 20));
+        g.fillArc(px, py - 40, pw, 80, 0, 180);
+        g.setColor(new Color(90, 60, 30));
+        g.setStroke(new BasicStroke(3));
+        g.drawArc(px, py - 40, pw, 80, 0, 180);
+        g.drawRect(px, py, pw, ph);
         // Muñequito
         dibujarMunequito(g, munX, munY);
 
         // En paintComponent (dibujo)
-        dibujarCuadro(g, imgCristo, rCristo.x, rCristo.y, rCristo.width, rCristo.height, false);
-        dibujarCuadro(g, imgTotoro, rTotoro.x, rTotoro.y, rTotoro.width, rTotoro.height, true);
-        dibujarCuadro(g, imgVango, rVango.x, rVango.y, rVango.width, rVango.height, false);
+
+        dibujarCuadro(g, imgCristo, imgMarco, rCristo.x, rCristo.y, rCristo.width, rCristo.height, false);
+        dibujarCuadro(g, imgTotoro, imgMarco, rTotoro.x, rTotoro.y, rTotoro.width, rTotoro.height, true);
+        dibujarCuadro(g, imgVango, imgMarco, rVango.x, rVango.y, rVango.width, rVango.height, false);
 
         // Vigas del techo
         g.setColor(new Color(45, 30, 20)); // café oscuro
